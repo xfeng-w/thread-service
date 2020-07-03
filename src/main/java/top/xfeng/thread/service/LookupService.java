@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class LookupService {
     private static final Logger logger = LoggerFactory.getLogger(LookupService.class);
 
-    @Async("taskExecutor")
+    @Async("threadPoolExecutor")
     public void thread(String name) throws InterruptedException {
         Thread.sleep(3000L);
 //        throw new RuntimeException();

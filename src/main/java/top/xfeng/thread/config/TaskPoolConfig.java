@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author xuefeng.wang
@@ -21,6 +21,10 @@ public class TaskPoolConfig {
         return getCommonExecutor("taskExecutor-");
     }
 
+    @Bean("threadPoolExecutor")
+    public Executor executor() {
+        return getThreadPoolExecutor("threadPoolExecutor");
+    }
 
     /**
      * 核心线程数10：线程池创建时初始化的线程数
@@ -32,7 +36,7 @@ public class TaskPoolConfig {
      * 设置线程池关闭的时候等待所有任务都完成再继续销毁其他的Bean
      * 设置线程池中任务的等待时间，如果超过这个时候还没有销毁就强制销毁，以确保应用最后能够被关闭，而不是阻塞住
      */
-    public Executor getCommonExecutor(String name) {
+    private Executor getCommonExecutor(String name) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10);
         executor.setMaxPoolSize(20);
@@ -44,5 +48,37 @@ public class TaskPoolConfig {
         executor.setAwaitTerminationSeconds(60);
         return executor;
     }
+
+    private Executor getThreadPoolExecutor(String name) {
+        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(5);
+        RejectedExecutionHandler discardPolicyHandler = new ThreadPoolExecutor.DiscardPolicy();
+        return new ThreadPoolExecutor(5, 10, 11, TimeUnit.SECONDS, workQueue, new MyThreadFactory(name), discardPolicyHandler);
+    }
+
+    static class MyThreadFactory implements ThreadFactory {
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        MyThreadFactory(String name) {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() :
+                    Thread.currentThread().getThreadGroup();
+            namePrefix = "pool-" + name + "-thread-";
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r,
+                    namePrefix + threadNumber.getAndIncrement(),
+                    0);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY)
+                t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        }
+    }
+
 
 }
