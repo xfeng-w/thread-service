@@ -36,7 +36,7 @@ public class TaskPoolConfig {
      * 设置线程池关闭的时候等待所有任务都完成再继续销毁其他的Bean
      * 设置线程池中任务的等待时间，如果超过这个时候还没有销毁就强制销毁，以确保应用最后能够被关闭，而不是阻塞住
      */
-    private Executor getCommonExecutor(String name) {
+    private ThreadPoolTaskExecutor getCommonExecutor(String name) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10);
         executor.setMaxPoolSize(20);
@@ -49,7 +49,7 @@ public class TaskPoolConfig {
         return executor;
     }
 
-    private Executor getThreadPoolExecutor(String name) {
+    private ExecutorService getThreadPoolExecutor(String name) {
         BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(5);
         RejectedExecutionHandler discardPolicyHandler = new ThreadPoolExecutor.DiscardPolicy();
         return new ThreadPoolExecutor(5, 10, 11, TimeUnit.SECONDS, workQueue, new MyThreadFactory(name), discardPolicyHandler);

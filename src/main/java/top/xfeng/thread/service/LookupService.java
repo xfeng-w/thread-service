@@ -1,5 +1,6 @@
 package top.xfeng.thread.service;
 
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -13,10 +14,10 @@ import org.springframework.stereotype.Service;
 public class LookupService {
     private static final Logger logger = LoggerFactory.getLogger(LookupService.class);
 
-    @Async("threadPoolExecutor")
-    public void thread(String name) throws InterruptedException {
+//    @Async("threadPoolExecutor")
+    @SneakyThrows
+    public void thread(String name)  {
         Thread.sleep(3000L);
-//        throw new RuntimeException();
         logger.info(name);
     }
 }
