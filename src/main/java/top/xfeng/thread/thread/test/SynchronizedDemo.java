@@ -14,22 +14,21 @@ public class SynchronizedDemo {
         return stock;
     }
 
-    private volatile int stock = 10;
+    private int stock = 0;
 
     public static void main(String[] args) {
         SynchronizedDemo demo = new SynchronizedDemo();
-        while (demo.getStock() > 0) {
-            new Thread(demo::updateStock,"user1").start();
-            new Thread(demo::updateStock,"user2").start();
-            new Thread(demo::updateStock,"user3").start();
+        for (int i = 0; i < 100; i++) {
+            new Thread(demo::updateStock, "user" + i).start();
         }
-
     }
 
+    /**
+     * 使用synchronized关键字实现线程安全
+     * 线程安全的情况下stock会递增到100
+     */
     private synchronized void updateStock() {
-        System.out.println("用户:"+Thread.currentThread()+"将要修改库存，"+"当前库存："+stock);
-        if (stock > 0) {
-            stock--;
-        }
+        stock++;
+        System.out.println("用户:" + Thread.currentThread() + "修改库存，" + "当前库存：" + stock);
     }
 }
