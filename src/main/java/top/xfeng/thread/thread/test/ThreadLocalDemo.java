@@ -7,6 +7,7 @@ package top.xfeng.thread.thread.test;
 public class ThreadLocalDemo {
 
     /**
+     * 线程独享
      * ThreadLocal每开一个线程都是线程内的变量
      */
     ThreadLocal<Integer> stock = ThreadLocal.withInitial(() -> 0);
